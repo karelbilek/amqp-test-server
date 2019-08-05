@@ -15,7 +15,7 @@ RUN cd /tmp && tar -xzf protobuf-2.6.1.tar.gz
 RUN cd /tmp/protobuf-2.6.1/ && ./configure && make install
 
 # Build dispatchd
-ENV BUILD_DIR /app/dispatchd/src/github.com/jeffjenkins/dispatchd/
+ENV BUILD_DIR /app/dispatchd/src/github.com/ernestrc/dispatchd/
 RUN mkdir -p $BUILD_DIR
 COPY . $BUILD_DIR
 ENV GOPATH /app/dispatchd

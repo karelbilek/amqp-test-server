@@ -2,8 +2,8 @@ package server
 
 import (
 	_ "fmt"
-	"github.com/jeffjenkins/dispatchd/amqp"
-	"github.com/jeffjenkins/dispatchd/exchange"
+	"github.com/ernestrc/dispatchd/amqp"
+	"github.com/ernestrc/dispatchd/exchange"
 	"strings"
 )
 

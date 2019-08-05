@@ -101,4 +101,4 @@ Dispatchd has a fairly extensive test suite. Almost all of the major functions a
 
 ## What's Next? How do I request changes?
 
-Non-trivial changes are tracked through [github issues](https://github.com/jeffjenkins/dispatchd/issues).
+Non-trivial changes are tracked through [github issues](https://github.com/ernestrc/dispatchd/issues).

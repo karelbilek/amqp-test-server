@@ -3,7 +3,7 @@ package adminserver
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jeffjenkins/dispatchd/server"
+	"github.com/ernestrc/dispatchd/server"
 	"github.com/rcrowley/go-metrics"
 	"net/http"
 	"os"

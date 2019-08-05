@@ -2,10 +2,11 @@ package consumer
 
 import (
 	"encoding/json"
-	"github.com/jeffjenkins/dispatchd/amqp"
-	"github.com/jeffjenkins/dispatchd/msgstore"
-	"github.com/jeffjenkins/dispatchd/stats"
 	"sync"
+
+	"github.com/ernestrc/dispatchd/amqp"
+	"github.com/ernestrc/dispatchd/msgstore"
+	"github.com/ernestrc/dispatchd/stats"
 )
 
 type Consumer struct {
@@ -222,7 +223,10 @@ func (consumer *Consumer) consumeOne() {
 }
 
 func (consumer *Consumer) SendCancel() {
-	consumer.cchannel.SendMethod(&amqp.BasicCancel{consumer.ConsumerTag, true})
+	var cancel amqp.BasicCancel
+	cancel.ConsumerTag = consumer.ConsumerTag
+	cancel.NoWait = true
+	consumer.cchannel.SendMethod(&cancel)
 }
 
 func (consumer *Consumer) ConsumeImmediate(qm *amqp.QueueMessage, msg *amqp.Message) bool {

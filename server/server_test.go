@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/jeffjenkins/dispatchd/util"
+	"github.com/ernestrc/dispatchd/util"
 	amqpclient "github.com/streadway/amqp"
 	"net"
 	"os"

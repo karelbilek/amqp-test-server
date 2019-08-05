@@ -3,7 +3,7 @@
 	real_line_count devserver benchmark_dev benchmark install clean
 
 PROTOC := protoc -I=${GOPATH}/src:${GOPATH}/src/github.com/gogo/protobuf/protobuf/
-PROJECT_PATH := ${GOPATH}/src/github.com/jeffjenkins/dispatchd
+PROJECT_PATH := ${GOPATH}/src/github.com/ernestrc/dispatchd
 
 RUN_PORT=5672
 PERF_SCRIPT=scripts/external/perf-client/runjava.sh
@@ -35,17 +35,17 @@ gen_pb: gen_amqp protoc_present
 	$(PROTOC) --gogo_out=${GOPATH}/src ${PROJECT_PATH}/gen/*.proto
 
 gen_amqp:
-	go run amqpgen/*.go --spec=amqp0-9-1.extended.xml && go fmt github.com/jeffjenkins/dispatchd/...
+	go run amqpgen/*.go --spec=amqp0-9-1.extended.xml && go fmt github.com/ernestrc/dispatchd/...
 	gofmt -w amqp/*generated*.go
 
 build: deps gen_all
-	go build -o ${GOPATH}/dispatchd github.com/jeffjenkins/dispatchd/server
+	go build -o ${GOPATH}/bin/dispatchd github.com/ernestrc/dispatchd/dispatchd
 
 install: deps gen_all
-	go install github.com/jeffjenkins/dispatchd/server
+	go install github.com/ernestrc/dispatchd/server
 
 test: deps gen_all
-	go test -cover github.com/jeffjenkins/dispatchd/...
+	go test -cover github.com/ernestrc/dispatchd/...
 
 full_coverage: test
 	# Output: $$GOPATH/all.cover
@@ -61,10 +61,10 @@ ${PERF_SCRIPT}:
 	mv scripts/external/rabbitmq-java-client-bin-3.5.6 scripts/external/perf-client/
 
 devserver: install
-	go install github.com/jeffjenkins/dispatchd/server
-	STATIC_PATH=${GOPATH}/src/github.com/jeffjenkins/dispatchd/static \
+	go install github.com/ernestrc/dispatchd/server
+	STATIC_PATH=${GOPATH}/src/github.com/ernestrc/dispatchd/static \
 		${GOPATH}/bin/server \
-		-config-file ${GOPATH}/src/github.com/jeffjenkins/dispatchd/dev/config.json
+		-config-file ${GOPATH}/src/github.com/ernestrc/dispatchd/dev/config.json
 
 benchmark_dev: scripts/external/perf-client/runjava.sh
 	RUN_PORT=1111 scripts/benchmark_helper.sh

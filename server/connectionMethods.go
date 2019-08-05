@@ -1,10 +1,11 @@
 package server
 
 import (
-	"github.com/jeffjenkins/dispatchd/amqp"
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/ernestrc/dispatchd/amqp"
 )
 
 func (channel *Channel) connectionRoute(conn *AMQPConnection, methodFrame amqp.MethodFrame) *amqp.AMQPError {
@@ -34,7 +35,7 @@ func (channel *Channel) connectionOpen(conn *AMQPConnection, method *amqp.Connec
 	// TODO(MAY): Add support for virtual hosts. Check for access to the
 	// selected one
 	conn.connectStatus.open = true
-	channel.SendMethod(&amqp.ConnectionOpenOk{""})
+	channel.SendMethod(&amqp.ConnectionOpenOk{Reserved1: ""})
 	conn.connectStatus.openOk = true
 	return nil
 }
@@ -83,9 +84,9 @@ func (channel *Channel) connectionStartOk(conn *AMQPConnection, method *amqp.Con
 	conn.clientProperties = method.ClientProperties
 	// TODO(MUST): add support these being enforced at the connection level.
 	channel.SendMethod(&amqp.ConnectionTune{
-		conn.maxChannels,
-		conn.maxFrameSize,
-		uint16(conn.receiveHeartbeatInterval.Nanoseconds() / int64(time.Second)),
+		ChannelMax: conn.maxChannels,
+		FrameMax:   conn.maxFrameSize,
+		Heartbeat:  uint16(conn.receiveHeartbeatInterval.Nanoseconds() / int64(time.Second)),
 	})
 	// TODO: Implement secure/secure-ok later if needed
 	conn.connectStatus.secure = true
@@ -117,7 +118,14 @@ func (channel *Channel) startConnection() *amqp.AMQPError {
 
 	serverProps.SetKey("information", []byte("http://dispatchd.org"))
 
-	channel.SendMethod(&amqp.ConnectionStart{0, 9, serverProps, []byte("PLAIN"), []byte("en_US")})
+	// VersionMajor         byte     `protobuf:"varint,1,opt,name=version_major,json=versionMajor,casttype=byte" json:"version_major"`
+	// VersionMinor         byte     `protobuf:"varint,2,opt,name=version_minor,json=versionMinor,casttype=byte" json:"version_minor"`
+	// ServerProperties     *Table   `protobuf:"bytes,3,opt,name=server_properties,json=serverProperties" json:"server_properties,omitempty"`
+	// Mechanisms           []byte   `protobuf:"bytes,4,opt,name=mechanisms" json:"mechanisms,omitempty"`
+	// Locales              []byte   `protobuf:"bytes,5,opt,name=locales" json:"locales,omitempty"`
+	channel.SendMethod(&amqp.ConnectionStart{VersionMajor: 0,
+		VersionMinor: 9, ServerProperties: serverProps,
+		Mechanisms: []byte("PLAIN"), Locales: []byte("en_US")})
 	return nil
 }
 

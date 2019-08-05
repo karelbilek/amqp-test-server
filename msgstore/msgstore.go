@@ -6,10 +6,10 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/boltdb/bolt"
+	"github.com/ernestrc/dispatchd/amqp"
+	"github.com/ernestrc/dispatchd/persist"
+	"github.com/ernestrc/dispatchd/stats"
 	"github.com/gogo/protobuf/proto"
-	"github.com/jeffjenkins/dispatchd/amqp"
-	"github.com/jeffjenkins/dispatchd/persist"
-	"github.com/jeffjenkins/dispatchd/stats"
 	"sync"
 	"time"
 )

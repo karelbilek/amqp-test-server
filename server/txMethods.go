@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/jeffjenkins/dispatchd/amqp"
+	"github.com/ernestrc/dispatchd/amqp"
 )
 
 func (channel *Channel) txRoute(methodFrame amqp.MethodFrame) *amqp.AMQPError {

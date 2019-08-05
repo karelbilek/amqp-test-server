@@ -3,8 +3,8 @@ package binding
 import (
 	"encoding/json"
 	"github.com/boltdb/bolt"
-	"github.com/jeffjenkins/dispatchd/amqp"
-	// "github.com/jeffjenkins/dispatchd/persist"
+	"github.com/ernestrc/dispatchd/amqp"
+	// "github.com/ernestrc/dispatchd/persist"
 	"os"
 	"testing"
 )

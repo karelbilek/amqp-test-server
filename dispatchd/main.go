@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net"
 	// _ "net/http/pprof" // uncomment for debugging
-	"github.com/jeffjenkins/dispatchd/adminserver"
-	"github.com/jeffjenkins/dispatchd/server"
+	"github.com/ernestrc/dispatchd/adminserver"
+	"github.com/ernestrc/dispatchd/server"
 	"os"
 	"path/filepath"
 	"runtime"

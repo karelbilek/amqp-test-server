@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/boltdb/bolt"
+	"github.com/ernestrc/dispatchd/amqp"
+	"github.com/ernestrc/dispatchd/gen"
+	"github.com/ernestrc/dispatchd/persist"
 	"github.com/gogo/protobuf/proto"
-	"github.com/jeffjenkins/dispatchd/amqp"
-	"github.com/jeffjenkins/dispatchd/gen"
-	"github.com/jeffjenkins/dispatchd/persist"
 	"regexp"
 	"strings"
 )

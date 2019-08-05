@@ -3,7 +3,7 @@ import sys
 import subprocess
 import os
 
-PREFIX = 'github.com/jeffjenkins/dispatchd/'
+PREFIX = 'github.com/ernestrc/dispatchd/'
 
 class Colors(object):
   PURPLE = '\033[95m'
@@ -22,7 +22,7 @@ def main(args):
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
   package_dir = os.path.join(gopath, 'src', PREFIX)
-  prefix = 'github.com/jeffjenkins/dispatchd/'
+  prefix = 'github.com/ernestrc/dispatchd/'
   test_packages = subprocess.check_output([
     'go',
     'list',
@@ -39,7 +39,7 @@ def main(args):
     cmd = [
       'go',
       'test',
-      '-coverpkg=github.com/jeffjenkins/dispatchd/...',
+      '-coverpkg=github.com/ernestrc/dispatchd/...',
       '-coverprofile={}'.format(cover_name),
       test_target,
     ]

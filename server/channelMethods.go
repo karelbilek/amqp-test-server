@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/jeffjenkins/dispatchd/amqp"
+	"github.com/ernestrc/dispatchd/amqp"
 )
 
 func (channel *Channel) channelRoute(methodFrame amqp.MethodFrame) *amqp.AMQPError {
@@ -35,7 +35,7 @@ func (channel *Channel) channelOpen(method *amqp.ChannelOpen) *amqp.AMQPError {
 
 func (channel *Channel) channelFlow(method *amqp.ChannelFlow) *amqp.AMQPError {
 	channel.changeFlow(method.Active)
-	channel.SendMethod(&amqp.ChannelFlowOk{channel.flow})
+	channel.SendMethod(&amqp.ChannelFlowOk{Active: channel.flow})
 	return nil
 }
 
