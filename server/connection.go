@@ -113,12 +113,13 @@ func (conn *AMQPConnection) deregisterChannel(id uint16) {
 
 func (conn *AMQPConnection) hardClose() {
 	conn.network.Close()
-	conn.connectStatus.closed = true
-	conn.server.deregisterConnection(conn.id)
-	conn.server.deleteQueuesForConn(conn.id)
-	for _, channel := range conn.channels {
-		channel.shutdown()
-	}
+	// FIXME data races
+	// conn.connectStatus.closed = true
+	// conn.server.deregisterConnection(conn.id)
+	// conn.server.deleteQueuesForConn(conn.id)
+	// for _, channel := range conn.channels {
+	// 	channel.shutdown()
+	// }
 }
 
 func (conn *AMQPConnection) setMaxChannels(max uint16) {
@@ -158,9 +159,11 @@ func (conn *AMQPConnection) handleClientHeartbeatTimeout() {
 			}
 			time.Sleep(conn.receiveHeartbeatInterval / 2) //
 			// If now is higher than TTL we need to time the client out
+			conn.lock.Lock()
 			if conn.ttl.Before(time.Now()) {
 				conn.hardClose()
 			}
+			conn.lock.Unlock()
 		}
 	}()
 }
@@ -230,7 +233,9 @@ func (conn *AMQPConnection) handleFrame(frame *amqp.WireFrame) {
 
 	// Upkeep. Remove things which have expired, etc
 	conn.cleanUp()
+	conn.lock.Lock()
 	conn.ttl = time.Now().Add(conn.receiveHeartbeatInterval * 2)
+	conn.lock.Unlock()
 
 	switch {
 	case frame.FrameType == 8:

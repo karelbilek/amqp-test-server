@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
+	"sync"
+
 	"github.com/boltdb/bolt"
 	"github.com/ernestrc/dispatchd/amqp"
 	"github.com/ernestrc/dispatchd/binding"
 	"github.com/ernestrc/dispatchd/exchange"
 	"github.com/ernestrc/dispatchd/msgstore"
 	"github.com/ernestrc/dispatchd/queue"
-	"net"
-	"sync"
 )
 
 type Server struct {
@@ -296,13 +297,11 @@ func (server *Server) deleteExchange(method *amqp.ExchangeDelete) (uint16, error
 	return 0, nil
 }
 
-func (server *Server) deregisterConnection(id int64) {
-	delete(server.conns, id)
-}
-
 func (server *Server) OpenConnection(network net.Conn) {
 	c := NewAMQPConnection(server, network)
+	server.serverLock.Lock()
 	server.conns[c.id] = c
+	server.serverLock.Unlock()
 	c.openConnection()
 }
 
@@ -397,4 +396,15 @@ func (server *Server) publish(exchange *exchange.Exchange, msg *amqp.Message) (*
 		}
 	}
 	return nil, nil
+}
+
+// Close closes all open connections
+func (server *Server) Close() error {
+	for _, conn := range server.conns {
+		conn.hardClose()
+	}
+	server.serverLock.Lock()
+	defer server.serverLock.Unlock()
+	server.conns = make(map[int64]*AMQPConnection)
+	return nil
 }
