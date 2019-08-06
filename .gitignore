@@ -1,4 +1,3 @@
-*.pb.go
 *.cover
 *.db
 scripts/external/
