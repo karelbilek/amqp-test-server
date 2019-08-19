@@ -108,6 +108,8 @@ func (conn *AMQPConnection) cleanUp() {
 }
 
 func (conn *AMQPConnection) deregisterChannel(id uint16) {
+	conn.lock.Lock()
+	defer conn.lock.Unlock()
 	delete(conn.channels, id)
 }
 
@@ -248,6 +250,7 @@ func (conn *AMQPConnection) handleFrame(frame *amqp.WireFrame) {
 		conn.hardClose()
 		return
 	}
+	conn.lock.Lock()
 	var channel, ok = conn.channels[frame.Channel]
 	// TODO(MUST): Check that the channel number if in the valid range
 	if !ok {
@@ -255,6 +258,7 @@ func (conn *AMQPConnection) handleFrame(frame *amqp.WireFrame) {
 		conn.channels[frame.Channel] = channel
 		conn.channels[frame.Channel].start()
 	}
+	conn.lock.Unlock()
 	// Dispatch
 	start := stats.Start()
 	channel.incoming <- frame
