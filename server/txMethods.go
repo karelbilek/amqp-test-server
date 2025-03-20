@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/ernestrc/dispatchd/amqp"
+	"github.com/karelbilek/amqp-test-server/amqp"
 )
 
 func (channel *Channel) txRoute(methodFrame amqp.MethodFrame) *amqp.AMQPError {

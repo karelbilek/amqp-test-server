@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ernestrc/dispatchd/amqp"
+	"github.com/karelbilek/amqp-test-server/amqp"
 )
 
 func (channel *Channel) connectionRoute(conn *AMQPConnection, methodFrame amqp.MethodFrame) *amqp.AMQPError {

@@ -3,7 +3,7 @@ package adminserver
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ernestrc/dispatchd/server"
+	"github.com/karelbilek/amqp-test-server/server"
 	"github.com/rcrowley/go-metrics"
 	"net/http"
 	"os"

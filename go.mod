@@ -1,4 +1,4 @@
-module github.com/ernestrc/dispatchd
+module github.com/karelbilek/amqp-test-server
 
 go 1.21.13
 

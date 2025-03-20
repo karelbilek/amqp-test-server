@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ernestrc/dispatchd/amqp"
-	"github.com/ernestrc/dispatchd/stats"
-	"github.com/ernestrc/dispatchd/util"
+	"github.com/karelbilek/amqp-test-server/amqp"
+	"github.com/karelbilek/amqp-test-server/stats"
+	"github.com/karelbilek/amqp-test-server/util"
 )
 
 // TODO: we can only be "in" one of these at once, so this should probably

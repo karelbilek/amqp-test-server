@@ -8,11 +8,11 @@ import (
 	"sync"
 
 	"github.com/boltdb/bolt"
-	"github.com/ernestrc/dispatchd/amqp"
-	"github.com/ernestrc/dispatchd/binding"
-	"github.com/ernestrc/dispatchd/exchange"
-	"github.com/ernestrc/dispatchd/msgstore"
-	"github.com/ernestrc/dispatchd/queue"
+	"github.com/karelbilek/amqp-test-server/amqp"
+	"github.com/karelbilek/amqp-test-server/binding"
+	"github.com/karelbilek/amqp-test-server/exchange"
+	"github.com/karelbilek/amqp-test-server/msgstore"
+	"github.com/karelbilek/amqp-test-server/queue"
 )
 
 type Server struct {

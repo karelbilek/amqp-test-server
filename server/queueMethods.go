@@ -3,10 +3,10 @@ package server
 import (
 	"fmt"
 
-	"github.com/ernestrc/dispatchd/amqp"
-	"github.com/ernestrc/dispatchd/binding"
-	"github.com/ernestrc/dispatchd/queue"
-	"github.com/ernestrc/dispatchd/util"
+	"github.com/karelbilek/amqp-test-server/amqp"
+	"github.com/karelbilek/amqp-test-server/binding"
+	"github.com/karelbilek/amqp-test-server/queue"
+	"github.com/karelbilek/amqp-test-server/util"
 )
 
 func (channel *Channel) queueRoute(methodFrame amqp.MethodFrame) *amqp.AMQPError {

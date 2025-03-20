@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net"
 	// _ "net/http/pprof" // uncomment for debugging
-	"github.com/ernestrc/dispatchd/adminserver"
-	"github.com/ernestrc/dispatchd/server"
+	"github.com/karelbilek/amqp-test-server/adminserver"
+	"github.com/karelbilek/amqp-test-server/server"
 	"os"
 	"path/filepath"
 	"runtime"

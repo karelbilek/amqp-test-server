@@ -5,13 +5,14 @@ import (
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
-	"github.com/boltdb/bolt"
-	"github.com/ernestrc/dispatchd/amqp"
-	"github.com/ernestrc/dispatchd/gen"
-	"github.com/ernestrc/dispatchd/persist"
-	"github.com/gogo/protobuf/proto"
 	"regexp"
 	"strings"
+
+	"github.com/boltdb/bolt"
+	"github.com/karelbilek/amqp-test-server/amqp"
+	"github.com/karelbilek/amqp-test-server/gen"
+	"github.com/karelbilek/amqp-test-server/persist"
+	"github.com/gogo/protobuf/proto"
 )
 
 type BindingStateFactory struct{}

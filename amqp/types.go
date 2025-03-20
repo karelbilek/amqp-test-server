@@ -3,7 +3,7 @@ package amqp
 import (
 	"errors"
 	"fmt"
-	"github.com/ernestrc/dispatchd/util"
+	"github.com/karelbilek/amqp-test-server/util"
 	"io"
 	"regexp"
 )

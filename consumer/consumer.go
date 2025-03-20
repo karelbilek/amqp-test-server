@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/ernestrc/dispatchd/amqp"
-	"github.com/ernestrc/dispatchd/msgstore"
-	"github.com/ernestrc/dispatchd/stats"
+	"github.com/karelbilek/amqp-test-server/amqp"
+	"github.com/karelbilek/amqp-test-server/msgstore"
+	"github.com/karelbilek/amqp-test-server/stats"
 )
 
 type Consumer struct {

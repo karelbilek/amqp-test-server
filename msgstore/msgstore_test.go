@@ -3,7 +3,7 @@ package msgstore
 import (
 	// "container/list"
 	"fmt"
-	"github.com/ernestrc/dispatchd/amqp"
+	"github.com/karelbilek/amqp-test-server/amqp"
 	"os"
 	"testing"
 )

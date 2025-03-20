@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/ernestrc/dispatchd/util"
+	"github.com/karelbilek/amqp-test-server/util"
 	"testing"
 )
 

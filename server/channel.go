@@ -7,10 +7,10 @@ import (
 	"math"
 	"sync"
 
-	"github.com/ernestrc/dispatchd/amqp"
-	"github.com/ernestrc/dispatchd/consumer"
-	"github.com/ernestrc/dispatchd/queue"
-	"github.com/ernestrc/dispatchd/stats"
+	"github.com/karelbilek/amqp-test-server/amqp"
+	"github.com/karelbilek/amqp-test-server/consumer"
+	"github.com/karelbilek/amqp-test-server/queue"
+	"github.com/karelbilek/amqp-test-server/stats"
 )
 
 const (
