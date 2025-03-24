@@ -1,12 +1,14 @@
 package server
 
 import (
-	"github.com/karelbilek/amqp-test-server/util"
-	amqpclient "github.com/streadway/amqp"
+	"context"
 	"net"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/karelbilek/amqp-test-server/util"
+	amqpclient "github.com/streadway/amqp"
 )
 
 var NO_ARGS = make(amqpclient.Table)
@@ -24,8 +26,8 @@ type testClient struct {
 func newTestClient(t *testing.T) *testClient {
 	serverDb := dbPath()
 	msgDb := dbPath()
-	s := NewServer(serverDb, msgDb, nil, false)
-	s.init()
+	s := NewServer(context.Background(), serverDb, msgDb, nil, false)
+	s.init(context.Background())
 	tc := &testClient{
 		t:        t,
 		s:        s,

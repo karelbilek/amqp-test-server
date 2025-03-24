@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -29,6 +30,7 @@ type ConnectStatus struct {
 }
 
 type AMQPConnection struct {
+	ctx                      context.Context
 	id                       int64
 	nextChannel              int
 	channels                 map[uint16]*Channel
@@ -59,7 +61,7 @@ func (conn *AMQPConnection) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func NewAMQPConnection(server *Server, network net.Conn) *AMQPConnection {
+func NewAMQPConnection(ctx context.Context, server *Server, network net.Conn) *AMQPConnection {
 	return &AMQPConnection{
 		// If outgoing has a buffer the server performs better. I'm not adding one
 		// in until I fully understand why that is
@@ -77,6 +79,7 @@ func NewAMQPConnection(server *Server, network net.Conn) *AMQPConnection {
 		statOutNetwork: stats.MakeHistogram("Connection.Out.Network"),
 		statInBlocked:  stats.MakeHistogram("Connection.In.Blocked"),
 		statInNetwork:  stats.MakeHistogram("Connection.In.Network"),
+		ctx:            ctx,
 	}
 }
 
@@ -97,7 +100,7 @@ func (conn *AMQPConnection) openConnection() {
 	}
 
 	// Create channel 0 and start the connection handshake
-	conn.channels[0] = NewChannel(0, conn)
+	conn.channels[0] = NewChannel(conn.ctx, 0, conn)
 	conn.channels[0].start()
 	conn.handleOutgoing()
 	conn.handleIncoming()
@@ -143,7 +146,11 @@ func (conn *AMQPConnection) handleSendHeartbeat() {
 			if conn.connectStatus.closed {
 				break
 			}
-			time.Sleep(conn.sendHeartbeatInterval / 2)
+			select {
+			case <-conn.ctx.Done():
+				return
+			case <-time.After(conn.sendHeartbeatInterval / 2):
+			}
 			conn.outgoing <- &amqp.WireFrame{FrameType: 8, Channel: 0, Payload: make([]byte, 0)}
 		}
 	}()
@@ -159,7 +166,11 @@ func (conn *AMQPConnection) handleClientHeartbeatTimeout() {
 			if conn.connectStatus.closed {
 				break
 			}
-			time.Sleep(conn.receiveHeartbeatInterval / 2) //
+			select {
+			case <-conn.ctx.Done():
+				return
+			case <-time.After(conn.receiveHeartbeatInterval / 2):
+			}
 			// If now is higher than TTL we need to time the client out
 			conn.lock.Lock()
 			if conn.ttl.Before(time.Now()) {
@@ -180,7 +191,12 @@ func (conn *AMQPConnection) handleOutgoing() {
 				break
 			}
 			var start = stats.Start()
-			var frame = <-conn.outgoing
+			var frame *amqp.WireFrame
+			select {
+			case frame = <-conn.outgoing:
+			case <-conn.ctx.Done():
+				return
+			}
 			stats.RecordHisto(conn.statOutBlocked, start)
 
 			// fmt.Printf("Sending outgoing message. type: %d\n", frame.FrameType)
@@ -254,7 +270,7 @@ func (conn *AMQPConnection) handleFrame(frame *amqp.WireFrame) {
 	var channel, ok = conn.channels[frame.Channel]
 	// TODO(MUST): Check that the channel number if in the valid range
 	if !ok {
-		channel = NewChannel(frame.Channel, conn)
+		channel = NewChannel(conn.ctx, frame.Channel, conn)
 		conn.channels[frame.Channel] = channel
 		conn.channels[frame.Channel].start()
 	}

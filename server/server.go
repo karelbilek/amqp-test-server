@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -28,6 +29,7 @@ type Server struct {
 	queueDeleter    chan *queue.Queue
 	users           map[string]User
 	strictMode      bool
+	ctx             context.Context
 }
 
 func (server *Server) MarshalJSON() ([]byte, error) {
@@ -44,13 +46,13 @@ func (server *Server) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func NewServer(dbPath string, msgStorePath string, userJson map[string]interface{}, strictMode bool) *Server {
+func NewServer(ctx context.Context, dbPath string, msgStorePath string, userJson map[string]interface{}, strictMode bool) *Server {
 	db, err := bolt.Open(dbPath, 0600, nil)
 	if err != nil {
 		panic(err.Error())
 
 	}
-	msgStore, err := msgstore.NewMessageStore(msgStorePath)
+	msgStore, err := msgstore.NewMessageStore(ctx, msgStorePath)
 	msgStore.Start()
 	if err != nil {
 		panic("Could not create message store!")
@@ -67,39 +69,51 @@ func NewServer(dbPath string, msgStorePath string, userJson map[string]interface
 		queueDeleter:    make(chan *queue.Queue),
 		users:           make(map[string]User),
 		strictMode:      strictMode,
+		ctx:             ctx,
 	}
 
-	server.init()
+	server.init(ctx)
 	server.addUsers(userJson)
 	return server
 }
 
-func (server *Server) init() {
+func (server *Server) init(ctx context.Context) {
 	server.msgStore.LoadMessages() //this must be before initQueues
 	server.initExchanges()
-	server.initQueues()
+	server.initQueues(ctx)
 	server.initBindings() // this must be after init{Exchanges,Queues}
 	go server.exchangeDeleteMonitor()
 	go server.queueDeleteMonitor()
 }
 
 func (server *Server) exchangeDeleteMonitor() {
-	for e := range server.exchangeDeleter {
-		var dele = &amqp.ExchangeDelete{
-			Exchange: e.Name,
-			NoWait:   true,
+	for {
+		select {
+		case e := <-server.exchangeDeleter:
+			var dele = &amqp.ExchangeDelete{
+
+				Exchange: e.Name,
+				NoWait:   true,
+			}
+			server.deleteExchange(dele)
+		case <-server.ctx.Done():
+			return
 		}
-		server.deleteExchange(dele)
 	}
 }
 
 func (server *Server) queueDeleteMonitor() {
-	for q := range server.queueDeleter {
-		var delq = &amqp.QueueDelete{
-			Queue:  q.Name,
-			NoWait: true,
+	for {
+		select {
+		case q := <-server.queueDeleter:
+			var delq = &amqp.QueueDelete{
+				Queue:  q.Name,
+				NoWait: true,
+			}
+			server.deleteQueue(delq, -1)
+		case <-server.ctx.Done():
+			return
 		}
-		server.deleteQueue(delq, -1)
 	}
 }
 
@@ -123,9 +137,9 @@ func (server *Server) initBindings() {
 	}
 }
 
-func (server *Server) initQueues() {
+func (server *Server) initQueues(ctx context.Context) {
 	// Load queues
-	queues, err := queue.LoadAllQueues(server.db, server.msgStore, server.queueDeleter)
+	queues, err := queue.LoadAllQueues(ctx, server.db, server.msgStore, server.queueDeleter)
 	if err != nil {
 		panic("Couldn't load queues!")
 	}
@@ -298,7 +312,7 @@ func (server *Server) deleteExchange(method *amqp.ExchangeDelete) (uint16, error
 }
 
 func (server *Server) OpenConnection(network net.Conn) {
-	c := NewAMQPConnection(server, network)
+	c := NewAMQPConnection(server.ctx, server, network)
 	server.serverLock.Lock()
 	server.conns[c.id] = c
 	server.serverLock.Unlock()

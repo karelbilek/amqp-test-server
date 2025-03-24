@@ -60,6 +60,7 @@ func (channel *Channel) queueDeclare(method *amqp.QueueDeclare) *amqp.AMQPError 
 		connId = -1
 	}
 	var queue = queue.NewQueue(
+		channel.ctx,
 		method.Queue,
 		method.Durable,
 		method.Exclusive,

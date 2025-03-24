@@ -2,10 +2,12 @@ package msgstore
 
 import (
 	// "container/list"
+	"context"
 	"fmt"
-	"github.com/karelbilek/amqp-test-server/amqp"
 	"os"
 	"testing"
+
+	"github.com/karelbilek/amqp-test-server/amqp"
 )
 
 func TestWrite(t *testing.T) {
@@ -14,7 +16,7 @@ func TestWrite(t *testing.T) {
 	os.Remove(dbFile)
 	defer os.Remove(dbFile)
 	rhs := []amqp.MessageResourceHolder{&TestResourceHolder{}}
-	ms, err := NewMessageStore(dbFile)
+	ms, err := NewMessageStore(context.Background(), dbFile)
 	// Create messages
 	msg1 := amqp.RandomMessage(true)
 	msg2 := amqp.RandomMessage(true)
@@ -45,7 +47,7 @@ func TestWrite(t *testing.T) {
 	}
 
 	// try loading from disk in the message store
-	ms2, err := NewMessageStore(dbFile)
+	ms2, err := NewMessageStore(context.Background(), dbFile)
 	_, err = ms2.LoadQueueFromDisk("some-queue")
 	if err != nil {
 		t.Errorf(err.Error())

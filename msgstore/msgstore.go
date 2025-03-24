@@ -3,15 +3,17 @@ package msgstore
 import (
 	"bytes"
 	"container/list"
+	"context"
 	"encoding/binary"
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/boltdb/bolt"
+	"github.com/gogo/protobuf/proto"
 	"github.com/karelbilek/amqp-test-server/amqp"
 	"github.com/karelbilek/amqp-test-server/persist"
 	"github.com/karelbilek/amqp-test-server/stats"
-	"github.com/gogo/protobuf/proto"
-	"sync"
-	"time"
 )
 
 var MESSAGE_INDEX_BUCKET = []byte("message_index")
@@ -47,6 +49,7 @@ type PersistKey struct {
 }
 
 type MessageStore struct {
+	ctx           context.Context
 	index         map[int64]*amqp.IndexMessage
 	messages      map[int64]*amqp.Message
 	addOps        map[PersistKey]*amqp.QueueMessage
@@ -60,7 +63,7 @@ type MessageStore struct {
 	statRemoveRef stats.Histogram
 }
 
-func NewMessageStore(fileName string) (*MessageStore, error) {
+func NewMessageStore(ctx context.Context, fileName string) (*MessageStore, error) {
 	db, err := bolt.Open(fileName, 0600, nil)
 	if err != nil {
 		return nil, err
@@ -72,6 +75,7 @@ func NewMessageStore(fileName string) (*MessageStore, error) {
 		addOps:       make(map[PersistKey]*amqp.QueueMessage),
 		delOps:       make(map[PersistKey]*amqp.QueueMessage),
 		deliveredOps: make(map[PersistKey]*amqp.QueueMessage),
+		ctx:          ctx,
 	}
 	// Stats
 	ms.statAdd = stats.MakeHistogram("add-message")
@@ -113,7 +117,11 @@ func (ms *MessageStore) periodicPersist() {
 	var defaultSleepTime = time.Duration(200 * time.Millisecond)
 	var sleepTime = defaultSleepTime
 	for {
-		time.Sleep(sleepTime)
+		select {
+		case <-ms.ctx.Done():
+			return
+		case <-time.After(sleepTime):
+		}
 		start := time.Now()
 		ms.persistOnce()
 		var diff = start.Sub(time.Now())

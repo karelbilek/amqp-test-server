@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -21,6 +22,7 @@ const (
 )
 
 type Channel struct {
+	ctx            context.Context
 	id             uint16
 	server         *Server
 	incoming       chan *amqp.WireFrame
@@ -60,7 +62,7 @@ type Channel struct {
 	statSendEncode stats.Histogram
 }
 
-func NewChannel(id uint16, conn *AMQPConnection) *Channel {
+func NewChannel(ctx context.Context, id uint16, conn *AMQPConnection) *Channel {
 	// Perf note: The server is significantly more performant if there's a
 	// buffer for incoming, but until there are metrics available to see
 	// what in particular is slow I'm leaving it as-is
@@ -81,6 +83,7 @@ func NewChannel(id uint16, conn *AMQPConnection) *Channel {
 		statRoute:      stats.MakeHistogram("statRoute"),
 		statSendChan:   stats.MakeHistogram("statSendChan"),
 		statSendEncode: stats.MakeHistogram("statSendEncode"),
+		ctx:            ctx,
 	}
 }
 
@@ -518,7 +521,12 @@ func (channel *Channel) start() {
 			if channel.state == CH_STATE_CLOSED {
 				break
 			}
-			var frame = <-channel.incoming
+			var frame *amqp.WireFrame
+			select {
+			case frame = <-channel.incoming:
+			case <-channel.ctx.Done():
+				return
+			}
 			var amqpErr *amqp.AMQPError = nil
 			switch {
 			case frame.FrameType == uint8(amqp.FrameMethod):

@@ -4,4 +4,6 @@ Fork of github.com/ernestrc/dispatchd which is fork of github.com/dayorbyte/disp
 
 The Makefile doesn't work at all.
 
+The context closure immediately closes all running goroutines; it's testable by uber goleak.
+
 See client-test for example usage.

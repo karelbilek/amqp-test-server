@@ -2,19 +2,21 @@ package queue
 
 import (
 	"container/list"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/boltdb/bolt"
+	"github.com/gogo/protobuf/proto"
 	"github.com/karelbilek/amqp-test-server/amqp"
 	"github.com/karelbilek/amqp-test-server/consumer"
 	"github.com/karelbilek/amqp-test-server/gen"
 	"github.com/karelbilek/amqp-test-server/msgstore"
 	"github.com/karelbilek/amqp-test-server/persist"
 	"github.com/karelbilek/amqp-test-server/stats"
-	"github.com/gogo/protobuf/proto"
-	"sync"
-	"time"
 )
 
 var QUEUE_BUCKET_NAME = []byte("queues")
@@ -26,6 +28,7 @@ func (qsf *QueueStateFactory) New() proto.Unmarshaler {
 }
 
 type Queue struct {
+	ctx context.Context
 	gen.QueueState
 	autoDelete      bool
 	exclusive       bool
@@ -48,6 +51,7 @@ type Queue struct {
 }
 
 func NewQueue(
+	ctx context.Context,
 	name string,
 	durable bool,
 	exclusive bool,
@@ -73,10 +77,11 @@ func NewQueue(
 		queue:       list.New(),
 		consumers:   make([]*consumer.Consumer, 0, 1),
 		maybeReady:  make(chan bool, 1),
+		ctx:         ctx,
 	}
 }
 
-func NewFromPersistedState(state *gen.QueueState, msgStore *msgstore.MessageStore, deleteChan chan *Queue) *Queue {
+func NewFromPersistedState(ctx context.Context, state *gen.QueueState, msgStore *msgstore.MessageStore, deleteChan chan *Queue) *Queue {
 	return &Queue{
 		QueueState: *state,
 		exclusive:  false,
@@ -89,6 +94,7 @@ func NewFromPersistedState(state *gen.QueueState, msgStore *msgstore.MessageStor
 		queue:       list.New(),
 		consumers:   make([]*consumer.Consumer, 0, 1),
 		maybeReady:  make(chan bool, 1),
+		ctx: ctx,
 	}
 }
 
@@ -159,14 +165,14 @@ func (q *Queue) DepersistBoltTx(tx *bolt.Tx) error {
 	return persist.DepersistOneBoltTx(bucket, q.Name)
 }
 
-func LoadAllQueues(db *bolt.DB, msgStore *msgstore.MessageStore, deleteChan chan *Queue) (map[string]*Queue, error) {
+func LoadAllQueues(ctx context.Context, db *bolt.DB, msgStore *msgstore.MessageStore, deleteChan chan *Queue) (map[string]*Queue, error) {
 	queueStateMap, err := persist.LoadAll(db, QUEUE_BUCKET_NAME, &QueueStateFactory{})
 	if err != nil {
 		return nil, err
 	}
 	var ret = make(map[string]*Queue)
 	for key, state := range queueStateMap {
-		ret[key] = NewFromPersistedState(state.(*gen.QueueState), msgStore, deleteChan)
+		ret[key] = NewFromPersistedState(ctx, state.(*gen.QueueState), msgStore, deleteChan)
 	}
 	return ret, nil
 }
@@ -342,17 +348,25 @@ func (q *Queue) AddConsumer(c *consumer.Consumer, exclusive bool) (uint16, error
 }
 
 func (q *Queue) Start() {
+	if q.ctx == nil {
+		panic("nil context")
+	}
 	go func() {
 		select {
 		case q.maybeReady <- true:
 		default:
 		}
-		for _ = range q.maybeReady {
-			if q.Closed {
-				fmt.Printf("Queue closed!\n")
-				break
+		for {
+			select {
+			case <-q.maybeReady:
+				if q.Closed {
+					fmt.Printf("Queue closed!\n")
+					break
+				}
+				q.processOne()
+			case <-q.ctx.Done():
+				return
 			}
-			q.processOne()
 		}
 	}()
 }
