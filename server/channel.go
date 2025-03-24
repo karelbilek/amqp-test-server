@@ -421,6 +421,7 @@ func (channel *Channel) addConsumer(q *queue.Queue, method *amqp.BasicConsume) *
 	var classId, methodId = method.MethodIdentifier()
 	// Create consumer
 	var consumer = consumer.NewConsumer(
+		channel.ctx,
 		channel.server.msgStore,
 		method.Arguments,
 		channel,

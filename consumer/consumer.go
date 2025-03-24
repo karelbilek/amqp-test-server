@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"context"
 	"encoding/json"
 	"sync"
 
@@ -35,6 +36,7 @@ type Consumer struct {
 	statConsumeOne       stats.Histogram
 	statConsumeOneAck    stats.Histogram
 	statConsumeOneSend   stats.Histogram
+	ctx                  context.Context
 }
 
 type ConsumerQueue interface {
@@ -52,6 +54,7 @@ type ConsumerChannel interface {
 }
 
 func NewConsumer(
+	ctx context.Context,
 	msgStore *msgstore.MessageStore,
 	arguments *amqp.Table,
 	cchannel ConsumerChannel,
@@ -84,6 +87,7 @@ func NewConsumer(
 		statConsumeOne:       stats.MakeHistogram("Consume-One-"),
 		statConsumeOneAck:    stats.MakeHistogram("Consume-One-Ack"),
 		statConsumeOneSend:   stats.MakeHistogram("Consume-One-Send"),
+		ctx:                  ctx,
 	}
 }
 
@@ -174,9 +178,13 @@ func (consumer *Consumer) Ping() {
 func (consumer *Consumer) consume(id uint16) {
 	// TODO: what is this doing?
 	consumer.cqueue.MaybeReady() <- false
-	for _ = range consumer.incoming {
-
-		consumer.consumeOne()
+	for {
+		select {
+		case <-consumer.incoming:
+			consumer.consumeOne()
+		case <-consumer.ctx.Done():
+			return
+		}
 	}
 }
 
