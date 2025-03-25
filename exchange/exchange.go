@@ -3,14 +3,15 @@ package exchange
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/boltdb/bolt"
+	"sync"
+	"time"
+
+	"github.com/gogo/protobuf/proto"
 	"github.com/karelbilek/amqp-test-server/amqp"
 	"github.com/karelbilek/amqp-test-server/binding"
 	"github.com/karelbilek/amqp-test-server/gen"
 	"github.com/karelbilek/amqp-test-server/persist"
-	"github.com/gogo/protobuf/proto"
-	"sync"
-	"time"
+	bolt "go.etcd.io/bbolt"
 )
 
 type ExchangeStateFactory struct{}

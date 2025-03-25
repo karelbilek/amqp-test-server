@@ -8,11 +8,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/boltdb/bolt"
+	"github.com/gogo/protobuf/proto"
 	"github.com/karelbilek/amqp-test-server/amqp"
 	"github.com/karelbilek/amqp-test-server/gen"
 	"github.com/karelbilek/amqp-test-server/persist"
-	"github.com/gogo/protobuf/proto"
+	bolt "go.etcd.io/bbolt"
 )
 
 type BindingStateFactory struct{}

@@ -9,11 +9,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/boltdb/bolt"
 	"github.com/gogo/protobuf/proto"
 	"github.com/karelbilek/amqp-test-server/amqp"
 	"github.com/karelbilek/amqp-test-server/persist"
 	"github.com/karelbilek/amqp-test-server/stats"
+	bolt "go.etcd.io/bbolt"
 )
 
 var MESSAGE_INDEX_BUCKET = []byte("message_index")

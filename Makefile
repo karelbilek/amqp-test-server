@@ -19,7 +19,7 @@ protoc_present:
 	which protoc
 
 deps:
-	go get github.com/boltdb/bolt \
+	go get go.etcd.io/bbolt \
 		github.com/gogo/protobuf/gogoproto \
 		github.com/gogo/protobuf/proto \
 		github.com/gogo/protobuf/protoc-gen-gogo \

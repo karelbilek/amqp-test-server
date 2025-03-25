@@ -2,9 +2,10 @@ package msgstore
 
 import (
 	"fmt"
-	"github.com/boltdb/bolt"
-	"github.com/karelbilek/amqp-test-server/amqp"
 	"reflect"
+
+	bolt "go.etcd.io/bbolt"
+	"github.com/karelbilek/amqp-test-server/amqp"
 )
 
 // ids to map

@@ -80,7 +80,7 @@ func main() {
 func runServer(ctx context.Context) {
 	serverDbPath := "dispatchd-server.db"
 	msgDbPath := "messages.db"
-	server := server.NewServer(serverDbPath, msgDbPath, map[string]interface{}{}, false)
+	server := server.NewServer(ctx, serverDbPath, msgDbPath, map[string]interface{}{}, false)
 	lc := net.ListenConfig{}
 	ln, err := lc.Listen(ctx, "tcp", ":1234")
 	if err != nil {

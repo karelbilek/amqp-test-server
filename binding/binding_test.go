@@ -2,8 +2,10 @@ package binding
 
 import (
 	"encoding/json"
-	"github.com/boltdb/bolt"
+
 	"github.com/karelbilek/amqp-test-server/amqp"
+	bolt "go.etcd.io/bbolt"
+
 	// "github.com/karelbilek/amqp-test-server/persist"
 	"os"
 	"testing"

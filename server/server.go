@@ -8,12 +8,12 @@ import (
 	"net"
 	"sync"
 
-	"github.com/boltdb/bolt"
 	"github.com/karelbilek/amqp-test-server/amqp"
 	"github.com/karelbilek/amqp-test-server/binding"
 	"github.com/karelbilek/amqp-test-server/exchange"
 	"github.com/karelbilek/amqp-test-server/msgstore"
 	"github.com/karelbilek/amqp-test-server/queue"
+	bolt "go.etcd.io/bbolt"
 )
 
 type Server struct {

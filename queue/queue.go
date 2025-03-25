@@ -9,7 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/boltdb/bolt"
 	"github.com/gogo/protobuf/proto"
 	"github.com/karelbilek/amqp-test-server/amqp"
 	"github.com/karelbilek/amqp-test-server/consumer"
@@ -17,6 +16,7 @@ import (
 	"github.com/karelbilek/amqp-test-server/msgstore"
 	"github.com/karelbilek/amqp-test-server/persist"
 	"github.com/karelbilek/amqp-test-server/stats"
+	bolt "go.etcd.io/bbolt"
 )
 
 var QUEUE_BUCKET_NAME = []byte("queues")
@@ -94,7 +94,7 @@ func NewFromPersistedState(ctx context.Context, state *gen.QueueState, msgStore 
 		queue:       list.New(),
 		consumers:   make([]*consumer.Consumer, 0, 1),
 		maybeReady:  make(chan bool, 1),
-		ctx: ctx,
+		ctx:         ctx,
 	}
 }
 

@@ -2,8 +2,9 @@ package persist
 
 import (
 	"fmt"
-	"github.com/boltdb/bolt"
+
 	"github.com/gogo/protobuf/proto"
+	bolt "go.etcd.io/bbolt"
 )
 
 type UnmarshalerFactory interface {

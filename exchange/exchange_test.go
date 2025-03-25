@@ -3,13 +3,14 @@ package exchange
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/boltdb/bolt"
-	"github.com/karelbilek/amqp-test-server/amqp"
-	"github.com/karelbilek/amqp-test-server/binding"
 	"os"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/karelbilek/amqp-test-server/amqp"
+	"github.com/karelbilek/amqp-test-server/binding"
+	bolt "go.etcd.io/bbolt"
 )
 
 func exchangeForTest(name string, typ uint8) *Exchange {
