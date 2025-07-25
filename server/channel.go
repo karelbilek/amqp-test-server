@@ -664,6 +664,10 @@ func (channel *Channel) handleContentHeader(frame *amqp.WireFrame) *amqp.AMQPErr
 		return amqp.NewHardError(500, "Error parsing header frame: "+err.Error(), 0, 0)
 	}
 	channel.currentMessage.Header = headerFrame
+	if headerFrame.ContentBodySize == 0 {
+		// no more body coming, publish
+		return channel.publish()
+	}
 	return nil
 }
 
@@ -685,6 +689,10 @@ func (channel *Channel) handleContentBody(frame *amqp.WireFrame) *amqp.AMQPError
 	}
 
 	// We have the whole contents, let's publish!
+	return channel.publish()
+}
+
+func (channel *Channel) publish() *amqp.AMQPError {
 	defer stats.RecordHisto(channel.statRoute, stats.Start())
 	var server = channel.server
 	var message = channel.currentMessage
