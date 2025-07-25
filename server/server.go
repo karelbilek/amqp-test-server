@@ -183,7 +183,7 @@ func (server *Server) genDefaultExchange(name string, typ uint8) {
 	if !hasKey {
 		var ex = exchange.NewExchange(
 			name,
-			exchange.EX_TYPE_TOPIC,
+			typ,
 			true,
 			false,
 			false,
